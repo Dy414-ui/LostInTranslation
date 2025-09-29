@@ -14,18 +14,30 @@ public class GUI {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Enter country
-            JPanel countryPanel = new JPanel();
-            JTextField countryField = new JTextField(10);
-            countryField.setEditable(true); // we only support the "can" country code for now
-            countryPanel.add(new JLabel("Country:"));
-            countryPanel.add(countryField);
+            // Code Converters
+            JSONTranslator translator = new JSONTranslator();
+            CountryCodeConverter countryConverter = new CountryCodeConverter();
+            LanguageCodeConverter languageConverter = new LanguageCodeConverter();
 
-            // Enter language
+            // Select country
+            JPanel countryPanel = new JPanel();
+            JComboBox<String> countryBox = new JComboBox<>(
+                    translator.getCountryCodes().stream()
+                            .map(countryConverter::fromCountryCode)
+                            .toArray(String[]::new)
+            );
+            countryPanel.add(new JLabel("Country:"));
+            countryPanel.add(countryBox);
+
+            // Select language
             JPanel languagePanel = new JPanel();
-            JTextField languageField = new JTextField(10);
+            JComboBox<String> languageBox = new JComboBox<>(
+                    translator.getLanguageCodes().stream()
+                            .map(languageConverter::fromLanguageCode)
+                            .toArray(String[]::new)
+            );
             languagePanel.add(new JLabel("Language:"));
-            languagePanel.add(languageField);
+            languagePanel.add(languageBox);
 
             // Submit button
             JPanel buttonPanel = new JPanel();
@@ -43,14 +55,13 @@ public class GUI {
             submit.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String language = languageField.getText();
-                    String country = countryField.getText();
+                    String language = (String) languageBox.getSelectedItem();
+                    String country = (String) countryBox.getSelectedItem();
 
-                    // for now, just using our simple translator, but
-                    // we'll need to use the real JSON version later.
-                    Translator translator = new CanadaTranslator();
+                    String countryCode = countryConverter.fromCountry(country);
+                    String languageCode = languageConverter.fromLanguage(language);
 
-                    String result = translator.translate(country, language);
+                    String result = translator.translate(countryCode, languageCode);
                     if (result == null) {
                         result = "no translation found!";
                     }
@@ -58,34 +69,21 @@ public class GUI {
                 }
             });
 
+
+            // Main Panel
             JPanel mainPanel = new JPanel();
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
             mainPanel.add(countryPanel);
             mainPanel.add(languagePanel);
             mainPanel.add(buttonPanel);
 
+            // Frame Setup
             JFrame frame = new JFrame("Country Name Translator");
             frame.setContentPane(mainPanel);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(500, 300);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
-
-            // Scroll list of countries
-            DefaultListModel<String> countryListModel = new DefaultListModel<>();
-            // Add all country names to list model from json
-            // Create list of countries
-            countryListModel.addElement("Canada");
-            countryListModel.addElement("France");
-
-
-            JList<String> countryList = new JList<>(countryListModel);
-            countryList.setBounds(0, 0, 500, 300);
-
-            frame.add(countryList);
-
-            // List of languages
-            DefaultListModel<String> languageListModel = new DefaultListModel<>();
 
         });
     }
