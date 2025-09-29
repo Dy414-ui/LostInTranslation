@@ -43,8 +43,8 @@ public class LanguageCodeConverter {
             while (iterator.hasNext()) {
                 String line = iterator.next();
                 String[] parts = line.split("\t");
-                languageCodeToLanguage.put(parts[1], parts[0]);
-                languageToLanguageCode.put(parts[0], parts[1]);
+                languageCodeToLanguage.put(parts[1].toLowerCase(), parts[0]);
+                languageToLanguageCode.put(parts[0], parts[1].toLowerCase());
             }
 
         } catch (IOException | URISyntaxException ex) {
@@ -58,7 +58,7 @@ public class LanguageCodeConverter {
      * @return the name of the language corresponding to the code
      */
     public String fromLanguageCode(String code) {
-        return languageCodeToLanguage.get(code);
+        return languageCodeToLanguage.get(code.toLowerCase());
     }
 
     /**
